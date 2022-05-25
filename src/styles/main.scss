@@ -164,7 +164,7 @@
   padding: 5px 17px;
   cursor: pointer;
   position: relative;
-  overflow: hidden;
+  max-height: 25px;
 
   &:before {
     content: '';
@@ -175,7 +175,7 @@
 
   &__arrow {
     position: absolute;
-    top: 50%;
+    top: 13px;
     left: 0;
     transform: translate(0, -50%);
     margin-left: 5px;
@@ -185,10 +185,15 @@
     border-left: 7px solid #000000;
     border-bottom: 3.5px solid transparent;
     cursor: pointer;
+    &.active_arrow {
+      border-top: 0;
+      border-left: 7px solid transparent;
+      border-bottom: 7px solid #000000;
+    }
   }
 
   &.active {
-    background: #6a6a6a;
-    border-radius: 10px;
+      background: #6a6a6a;
+      border-radius: 10px;
   }
 }
