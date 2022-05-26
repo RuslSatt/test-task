@@ -24,17 +24,19 @@
                                 </button>
                             </li>
                             <li>
-                                <button data-func='loadFolder' class="header__button">
+                                <button data-func='uploadFile' class="header__button">
                                     Загрузить файл
                                 </button>
+                                <input id='input_file' type='file'>
                             </li>
                             <li>
-                                <button data-func='downloadFolder' class="header__button">
+                                <button data-func='downloadFile' class="header__button">
                                     Скачать файл
+                                    <a id='download__file' download='' href=''></a>
                                 </button>
                             </li>
                             <li>
-                                <button data-func='deleteFile' class="header__button">
+                                <button data-func='removeFile' class="header__button">
                                     Удалить файл
                                 </button>
                             </li>
@@ -50,10 +52,17 @@
                     <aside class="main__sidebar sidebar">
 
                     </aside>
-                    <nav class="main__tabs tabs">
+                    <div class='main__area'>
+                        <nav class="main__tabs tabs">
 
-                    </nav>
+                        </nav>
+                        <pre class='main__content'>
+
+                        </pre>
+                    </div>
+
                 </main>
+
             </div>
     </div>
 </body>
