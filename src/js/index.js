@@ -420,10 +420,6 @@ function getFiles() {
     return document.querySelectorAll('.file')
 }
 
-function getCross() {
-    return document.querySelectorAll('.tabs__cross')
-}
-
 function downloadFile() {
     getFiles().forEach((file) => {
         if (file.classList.contains('active')) {
@@ -452,18 +448,26 @@ function openFile(file) {
     if (!isHaveFile) TAB.append(addTab(nameFile))
 }
 
+function updateContent() {
+    if (getFilesFromTab().length) {
+        getFilesFromTab().forEach((tab, index) => {
+            if (index < 1) {
+                tab.classList.add('active')
+                const item = localStorage.getItem(`${tab.innerText}`)
+                const value = JSON.parse(item)
+                if (value) MAIN.innerText = value.value
+            } else {
+                tab.classList.remove('active')
+            }
+        })
+    }
+}
+
 function closeFile(parent) {
     if (parent.classList.contains('active')) {
         parent.remove()
         MAIN.innerText = ''
-        if (getFilesFromTab().length)
-            getFilesFromTab().forEach((tab, index) => {
-                if (index < 1) {
-                    const item = localStorage.getItem(`${tab.innerText}`)
-                    const value = JSON.parse(item)
-                    if (value) MAIN.innerText = value.value
-                }
-            })
+        updateContent()
     }
 }
 
@@ -479,29 +483,33 @@ function removeFile() {
                     tab.remove()
                 }
             })
+            updateContent()
         }
     })
 }
 
 function renameFile(input) {
-    getFiles().forEach((file) => {
-        if (file.classList.contains('active')) {
-            if (input.value.length > 0) {
-                const item = localStorage.getItem(`${file.innerText}`)
-                localStorage.removeItem(`${file.innerText}`)
-                const value = JSON.parse(item)
-                value.name = input.value
-                localStorage.setItem(value.name, JSON.stringify(value))
-                getFilesFromTab().forEach((tab) => {
-                    if (tab.innerText === file.innerText) {
-                        tab.firstChild.nodeValue = input.value
-                    }
-                })
-                file.firstChild.nodeValue = input.value
-                file.classList.remove('active')
+    const files = Array.from(getFiles())
+    const filterFile = files.filter((name) => name.innerText === input.value)
+    if (!filterFile.length)
+        getFiles().forEach((file) => {
+            if (file.classList.contains('active')) {
+                if (input.value.length > 0) {
+                    const item = localStorage.getItem(`${file.innerText}`)
+                    localStorage.removeItem(`${file.innerText}`)
+                    const value = JSON.parse(item)
+                    value.name = input.value
+                    localStorage.setItem(value.name, JSON.stringify(value))
+                    getFilesFromTab().forEach((tab) => {
+                        if (tab.innerText === file.innerText) {
+                            tab.firstChild.nodeValue = input.value
+                        }
+                    })
+                    file.firstChild.nodeValue = input.value
+                    file.classList.remove('active')
+                }
             }
-        }
-    })
+        })
 }
 
 window.addEventListener('pageshow', () => {
