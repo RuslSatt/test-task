@@ -31,24 +31,34 @@ WRAPPER.addEventListener('click', (e) => {
         }
         removePopup(popup)
     } else if (target.closest('.popup__button')) {
-        let isActive = false
-        let folderActive
-        getFolders().forEach((folder) => {
-            if (folder.classList.contains('active')) {
-                isActive = true
-                folderActive = folder
-            }
+        if (getFolders().length) {
+            getFolders().forEach((folder, index) => {
+                if (folder.classList.contains('active')) {
+                    if (target.innerText === 'Создать') {
+                        createFolder(input, folder)
+                    } else {
+                        renameFolder(input)
+                    }
+                } else if (
+                    index === getFolders().length - 1 &&
+                    target.innerText !== 'Переименовать'
+                ) {
+                    createFolder(input)
+                }
+            })
+        } else if (target.innerText !== 'Переименовать') {
+            createFolder(input)
+        }
+
+        getFiles().forEach((file) => {
+            if (file.classList.contains('active')) renameFile(input)
         })
-        target.innerText === 'Создать' && isActive
-            ? createFolder(input, folderActive)
-            : target.innerText === 'Создать' && !isActive
-            ? createFolder(input)
-            : renameFolder(input)
+
         removePopup(popup)
     }
 })
 
-const clickButton = (e) => {
+BUTTONS.addEventListener('click', (e) => {
     let titlePopup, nameBtn
     const button = e.target.dataset.func
     if (button === 'createFolder') {
@@ -58,13 +68,22 @@ const clickButton = (e) => {
     } else if (button === 'removeFolder') {
         removeFolder()
     } else if (button === 'rename') {
-        getFolders().forEach((elem) => {
-            if (elem.classList.contains('active')) {
-                titlePopup = 'Переименуйте дерикторию'
-                nameBtn = 'Переименовать'
-                createPopup(titlePopup, nameBtn)
-            }
-        })
+        if (getFolders().length)
+            getFolders().forEach((folder) => {
+                if (folder.classList.contains('active')) {
+                    titlePopup = 'Переименуйте дерикторию'
+                    nameBtn = 'Переименовать'
+                    createPopup(titlePopup, nameBtn)
+                }
+            })
+        if (getFiles().length)
+            getFiles().forEach((file) => {
+                if (file.classList.contains('active')) {
+                    titlePopup = 'Переименуйте файл'
+                    nameBtn = 'Переименовать'
+                    createPopup(titlePopup, nameBtn)
+                }
+            })
     } else if (button === 'uploadFile') {
         INPUT_FILE.click()
     } else if (button === 'downloadFile') {
@@ -72,9 +91,7 @@ const clickButton = (e) => {
     } else if (button === 'removeFile') {
         removeFile()
     }
-}
-
-BUTTONS.addEventListener('click', clickButton)
+})
 
 SIDEBAR.addEventListener('click', (e) => {
     const target = e.target
@@ -363,7 +380,7 @@ function openFile(file) {
     const nameFile = file.innerText
     const item = localStorage.getItem(`${nameFile}`)
     const value = JSON.parse(item)
-    MAIN.innerText = value.value
+    if (value) MAIN.innerText = value.value
 }
 
 function removeFile() {
@@ -378,6 +395,27 @@ function removeFile() {
                     tab.remove()
                 }
             })
+        }
+    })
+}
+
+function renameFile(input) {
+    getFiles().forEach((file) => {
+        if (file.classList.contains('active')) {
+            if (input.value.length > 0) {
+                const item = localStorage.getItem(`${file.innerText}`)
+                localStorage.removeItem(`${file.innerText}`)
+                const value = JSON.parse(item)
+                value.name = input.value
+                localStorage.setItem(value.name, JSON.stringify(value))
+                getFilesFromTab().forEach((tab) => {
+                    if (tab.innerText === file.innerText) {
+                        tab.firstChild.nodeValue = input.value
+                    }
+                })
+                file.firstChild.nodeValue = input.value
+                file.classList.remove('active')
+            }
         }
     })
 }
