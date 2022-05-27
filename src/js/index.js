@@ -8,6 +8,7 @@ const SIDEBAR = document.querySelector('.sidebar')
 const TAB = document.querySelector('.tabs')
 const INPUT_FILE = document.querySelector('#input_file')
 const LINK_FILE = document.querySelector('#download__file')
+let folderActive = null
 
 WRAPPER.addEventListener('click', (e) => {
     const input = document.querySelector('.popup__input')
@@ -85,6 +86,12 @@ BUTTONS.addEventListener('click', (e) => {
                 }
             })
     } else if (button === 'uploadFile') {
+        folderActive = null
+        getFolders().forEach((folder) => {
+            if (folder.classList.contains('active')) {
+                folderActive = folder
+            }
+        })
         INPUT_FILE.click()
     } else if (button === 'downloadFile') {
         LINK_FILE.click()
@@ -336,27 +343,23 @@ function addFile(nameFile, value) {
     tab.innerText = nameFile
 
     let isHave = false
-    let isActive = false
 
-    if (!isActive) {
-        check()
+    const appendFile = () => {
+        folderActive ? folderActive.append(file) : SIDEBAR.append(file)
+        TAB.append(tab)
+        MAIN.innerText = value
     }
-    function check() {
-        if (!getFiles().length) {
-            SIDEBAR.append(file)
-            TAB.append(tab)
-            MAIN.innerText = value
-        } else {
-            getFiles().forEach((files) => {
-                if (files.innerText === nameFile) {
-                    isHave = true
-                }
-            })
-            if (!isHave) {
-                SIDEBAR.append(file)
-                TAB.append(tab)
-                MAIN.innerText = value
+
+    if (!getFiles().length) {
+        appendFile()
+    } else {
+        getFiles().forEach((files) => {
+            if (files.innerText === nameFile) {
+                isHave = true
             }
+        })
+        if (!isHave) {
+            appendFile()
         }
     }
 }
