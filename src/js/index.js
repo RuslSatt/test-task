@@ -1,8 +1,10 @@
 import '../index.html'
 import '../styles/main.scss'
+import hljs from 'highlight.js'
+import 'highlight.js/styles/github.css'
 
 const WRAPPER = document.querySelector('.wrapper')
-const MAIN = document.querySelector('.main__content')
+const CONTENT = document.querySelector('code')
 const BUTTONS = document.querySelector('.header__list')
 const SIDEBAR = document.querySelector('.sidebar')
 const TAB = document.querySelector('.tabs')
@@ -383,7 +385,8 @@ function addFile(nameFile, value) {
     const appendFile = () => {
         activeFolder ? activeFolder.append(file) : SIDEBAR.append(file)
         TAB.append(addTab(nameFile))
-        MAIN.innerText = value
+        CONTENT.innerHTML = value
+        hljs.highlightAll()
     }
 
     if (!getFiles().length) {
@@ -438,7 +441,8 @@ function openFile(file) {
     const nameFile = file.innerText
     const item = localStorage.getItem(`${nameFile}`)
     const value = JSON.parse(item)
-    if (value) MAIN.innerText = value.value
+    if (value) CONTENT.innerHTML = value.value
+    hljs.highlightAll()
     let isHaveFile = false
     getFilesFromTab().forEach((tab, index) => {
         if (nameFile === tab.innerText) {
@@ -455,7 +459,8 @@ function updateContent() {
                 tab.classList.add('active')
                 const item = localStorage.getItem(`${tab.innerText}`)
                 const value = JSON.parse(item)
-                if (value) MAIN.innerText = value.value
+                if (value) CONTENT.innerHTML = value.value
+                hljs.highlightAll()
             } else {
                 tab.classList.remove('active')
             }
@@ -466,7 +471,7 @@ function updateContent() {
 function closeFile(parent) {
     if (parent.classList.contains('active')) {
         parent.remove()
-        MAIN.innerText = ''
+        CONTENT.innerText = ''
         updateContent()
     }
 }
@@ -477,7 +482,7 @@ function removeFile() {
             const name = file.innerText
             localStorage.removeItem(name)
             file.remove()
-            MAIN.innerText = ''
+            CONTENT.innerText = ''
             getFilesFromTab().forEach((tab) => {
                 if (name === tab.innerText) {
                     tab.remove()
