@@ -8,9 +8,53 @@ const SIDEBAR = document.querySelector('.sidebar')
 const TAB = document.querySelector('.tabs')
 const INPUT_FILE = document.querySelector('#input_file')
 const LINK_FILE = document.querySelector('#download__file')
-let folderActive = null
+// Используется при добавлении файла внутрь каталога
+let activeFolder = null
 
-WRAPPER.addEventListener('click', (e) => {
+const clickOnButton = (e) => {
+    let titlePopup, nameBtn
+    const button = e.target.dataset.func
+    if (button === 'createFolder') {
+        titlePopup = 'Введите название папки'
+        nameBtn = 'Создать'
+        createPopup(titlePopup, nameBtn)
+    } else if (button === 'removeFolder') {
+        removeFolder()
+    } else if (button === 'rename') {
+        if (getFolders().length)
+            getFolders().forEach((folder) => {
+                if (folder.classList.contains('active')) {
+                    titlePopup = 'Переименуйте дерикторию'
+                    nameBtn = 'Переименовать'
+                    createPopup(titlePopup, nameBtn)
+                }
+            })
+        if (getFiles().length)
+            getFiles().forEach((file) => {
+                if (file.classList.contains('active')) {
+                    titlePopup = 'Переименуйте файл'
+                    nameBtn = 'Переименовать'
+                    createPopup(titlePopup, nameBtn)
+                }
+            })
+    } else if (button === 'uploadFile') {
+        activeFolder = null
+        getFolders().forEach((folder) => {
+            if (folder.classList.contains('active')) {
+                activeFolder = folder
+            }
+        })
+        INPUT_FILE.click()
+    } else if (button === 'downloadFile') {
+        LINK_FILE.click()
+    } else if (button === 'removeFile') {
+        removeFile()
+    }
+}
+
+BUTTONS.addEventListener('click', clickOnButton)
+
+const clickOutsideAndUsePopup = (e) => {
     const input = document.querySelector('.popup__input')
     const popup = document.querySelector('.popup')
     const target = e.target
@@ -42,68 +86,33 @@ WRAPPER.addEventListener('click', (e) => {
                     }
                 } else if (
                     index === getFolders().length - 1 &&
-                    target.innerText !== 'Переименовать'
+                    target.innerText === 'Создать'
                 ) {
                     createFolder(input)
                 }
             })
-        } else if (target.innerText !== 'Переименовать') {
+        } else if (target.innerText === 'Создать') {
             createFolder(input)
         }
 
         getFiles().forEach((file) => {
-            if (file.classList.contains('active')) renameFile(input)
+            if (
+                file.classList.contains('active') &&
+                target.innerText !== 'Создать'
+            )
+                renameFile(input)
         })
 
         removePopup(popup)
     }
-})
+}
 
-BUTTONS.addEventListener('click', (e) => {
-    let titlePopup, nameBtn
-    const button = e.target.dataset.func
-    if (button === 'createFolder') {
-        titlePopup = 'Введите название папки'
-        nameBtn = 'Создать'
-        createPopup(titlePopup, nameBtn)
-    } else if (button === 'removeFolder') {
-        removeFolder()
-    } else if (button === 'rename') {
-        if (getFolders().length)
-            getFolders().forEach((folder) => {
-                if (folder.classList.contains('active')) {
-                    titlePopup = 'Переименуйте дерикторию'
-                    nameBtn = 'Переименовать'
-                    createPopup(titlePopup, nameBtn)
-                }
-            })
-        if (getFiles().length)
-            getFiles().forEach((file) => {
-                if (file.classList.contains('active')) {
-                    titlePopup = 'Переименуйте файл'
-                    nameBtn = 'Переименовать'
-                    createPopup(titlePopup, nameBtn)
-                }
-            })
-    } else if (button === 'uploadFile') {
-        folderActive = null
-        getFolders().forEach((folder) => {
-            if (folder.classList.contains('active')) {
-                folderActive = folder
-            }
-        })
-        INPUT_FILE.click()
-    } else if (button === 'downloadFile') {
-        LINK_FILE.click()
-    } else if (button === 'removeFile') {
-        removeFile()
-    }
-})
+WRAPPER.addEventListener('click', clickOutsideAndUsePopup)
 
-SIDEBAR.addEventListener('click', (e) => {
+const clickOnBarAndArrow = (e) => {
     const target = e.target
     target.classList.add('active')
-    if (getFolders() && getArrows() && getFiles() !== undefined) {
+    if (getFolders() && getArrows() && getFiles()) {
         getFolders().forEach((folder) => {
             if (folder !== target) {
                 folder.classList.remove('active')
@@ -127,13 +136,22 @@ SIDEBAR.addEventListener('click', (e) => {
             foldersChild.style.display === 'none' ? openFolder() : closeFolder()
         }
     }
-})
+}
 
-SIDEBAR.addEventListener('dblclick', (e) => {
+SIDEBAR.addEventListener('click', clickOnBarAndArrow)
+
+const dbClickOnFoldersAndFiles = (e) => {
     const target = e.target
-    const childFolder = target.querySelector('.folder')
-    if (childFolder !== null) {
-        if (childFolder.style.display === 'block') {
+    const folderChild = target.querySelector('.folder')
+    const fileChild = target.querySelector('.file')
+    if (folderChild !== null) {
+        if (folderChild.style.display === 'block') {
+            closeFolder()
+        } else {
+            openFolder()
+        }
+    } else if (fileChild !== null) {
+        if (fileChild.style.display === 'block') {
             closeFolder()
         } else {
             openFolder()
@@ -149,9 +167,11 @@ SIDEBAR.addEventListener('dblclick', (e) => {
             }
         })
     }
-})
+}
 
-TAB.addEventListener('click', (e) => {
+SIDEBAR.addEventListener('dblclick', dbClickOnFoldersAndFiles)
+
+const clickOnTabs = (e) => {
     const target = e.target
     if (getFilesFromTab() !== undefined) {
         getFilesFromTab().forEach((tab) => {
@@ -162,7 +182,9 @@ TAB.addEventListener('click', (e) => {
             }
         })
     }
-})
+}
+
+TAB.addEventListener('click', clickOnTabs)
 
 function createPopup(titlePopup, nameBtn) {
     let popup = document.createElement('div')
@@ -188,9 +210,7 @@ function createPopup(titlePopup, nameBtn) {
 }
 
 function removePopup(popup) {
-    if (popup !== null) {
-        popup.remove()
-    }
+    if (popup) popup.remove()
 }
 
 function createFolder(input, seat) {
@@ -276,11 +296,15 @@ function closeFolder() {
             if (folder.children.length > 1) {
                 const arrowsChild = folder.querySelectorAll('.active_arrow')
                 const foldersChild = folder.querySelectorAll('.folder')
+                const filesChild = folder.querySelectorAll('.file')
                 arrowsChild.forEach((arrow) => {
                     arrow.classList.remove('active_arrow')
                 })
                 foldersChild.forEach((folderChild) => {
                     folderChild.style.display = 'none'
+                })
+                filesChild.forEach((fileChild) => {
+                    fileChild.style.display = 'none'
                 })
             }
         }
@@ -333,6 +357,7 @@ function addFile(nameFile, value) {
     let file = document.createElement('div')
     file.className = 'file active'
     file.innerText = nameFile
+    file.style.display = 'block'
 
     getFilesFromTab().forEach((tab) => {
         tab.classList.remove('active')
@@ -344,8 +369,14 @@ function addFile(nameFile, value) {
 
     let isHave = false
 
+    getFolders().forEach((folder) => {
+        if (folder === activeFolder) {
+            folder.children[0].classList.add('active_arrow')
+        }
+    })
+
     const appendFile = () => {
-        folderActive ? folderActive.append(file) : SIDEBAR.append(file)
+        activeFolder ? activeFolder.append(file) : SIDEBAR.append(file)
         TAB.append(tab)
         MAIN.innerText = value
     }

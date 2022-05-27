@@ -2,8 +2,12 @@
 @import url(https://fonts.googleapis.com/css?family=Neucha:regular);
 
 // global ---------------- //
-.body {
-
+html {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .wrapper {
