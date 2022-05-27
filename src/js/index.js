@@ -46,7 +46,7 @@ const clickOnButton = (e) => {
         })
         INPUT_FILE.click()
     } else if (button === 'downloadFile') {
-        LINK_FILE.click()
+        if (LINK_FILE.href !== '') LINK_FILE.click()
     } else if (button === 'removeFile') {
         removeFile()
     }
@@ -173,14 +173,23 @@ SIDEBAR.addEventListener('dblclick', dbClickOnFoldersAndFiles)
 
 const clickOnTabs = (e) => {
     const target = e.target
-    if (getFilesFromTab() !== undefined) {
+    if (getFilesFromTab()) {
         getFilesFromTab().forEach((tab) => {
-            if (tab !== target && target !== TAB) {
+            if (
+                target !== tab &&
+                target !== TAB &&
+                !target.closest('.tabs__cross')
+            ) {
                 tab.classList.remove('active')
             } else if (tab === target && target !== TAB) {
                 openFile(target)
             }
         })
+    }
+    if (target.closest('.tabs__cross')) {
+        const parent = target.parentNode
+        parent.classList.add('active')
+        closeFile(parent)
     }
 }
 
@@ -363,10 +372,6 @@ function addFile(nameFile, value) {
         tab.classList.remove('active')
     })
 
-    let tab = document.createElement('span')
-    tab.className = 'tabs__tab active'
-    tab.innerText = nameFile
-
     let isHave = false
 
     getFolders().forEach((folder) => {
@@ -377,7 +382,7 @@ function addFile(nameFile, value) {
 
     const appendFile = () => {
         activeFolder ? activeFolder.append(file) : SIDEBAR.append(file)
-        TAB.append(tab)
+        TAB.append(addTab(nameFile))
         MAIN.innerText = value
     }
 
@@ -395,6 +400,18 @@ function addFile(nameFile, value) {
     }
 }
 
+function addTab(nameFile) {
+    let tab = document.createElement('span')
+    tab.className = 'tabs__tab active'
+    tab.innerText = nameFile
+
+    let cross = document.createElement('span')
+    cross.className = 'tabs__cross'
+
+    tab.append(cross)
+    return tab
+}
+
 function getFilesFromTab() {
     return document.querySelectorAll('.tabs__tab')
 }
@@ -403,8 +420,19 @@ function getFiles() {
     return document.querySelectorAll('.file')
 }
 
+function getCross() {
+    return document.querySelectorAll('.tabs__cross')
+}
+
 function downloadFile() {
-    // LINK_FILE.href = localStorage.getItem('url')
+    getFiles().forEach((file) => {
+        if (file.classList.contains('active')) {
+            const item = localStorage.getItem(`${file.innerText}`)
+            const value = JSON.parse(item)
+            LINK_FILE.href = value.url
+            LINK_FILE.download = value.name
+        }
+    })
 }
 
 LINK_FILE.addEventListener('click', downloadFile)
@@ -415,6 +443,28 @@ function openFile(file) {
     const item = localStorage.getItem(`${nameFile}`)
     const value = JSON.parse(item)
     if (value) MAIN.innerText = value.value
+    let isHaveFile = false
+    getFilesFromTab().forEach((tab, index) => {
+        if (nameFile === tab.innerText) {
+            isHaveFile = true
+        }
+    })
+    if (!isHaveFile) TAB.append(addTab(nameFile))
+}
+
+function closeFile(parent) {
+    if (parent.classList.contains('active')) {
+        parent.remove()
+        MAIN.innerText = ''
+        if (getFilesFromTab().length)
+            getFilesFromTab().forEach((tab, index) => {
+                if (index < 1) {
+                    const item = localStorage.getItem(`${tab.innerText}`)
+                    const value = JSON.parse(item)
+                    if (value) MAIN.innerText = value.value
+                }
+            })
+    }
 }
 
 function removeFile() {
