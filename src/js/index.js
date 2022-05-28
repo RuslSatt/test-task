@@ -1,21 +1,45 @@
 import '../index.html'
 import '../styles/main.scss'
-import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css'
+import {
+    editDescription,
+    getDescription,
+    saveDescription,
+    showDescription,
+} from './components/description'
+import {
+    closeFile,
+    getFiles,
+    getFilesFromTab,
+    INPUT,
+    LINK,
+    openFile,
+    removeFile,
+    renameFile,
+} from './components/files'
+import {
+    closeFolder,
+    createFolder,
+    getArrows,
+    getFolders,
+    openFolder,
+    removeFolder,
+    renameFolder,
+} from './components/folders'
+import { createPopup, removePopup } from './components/popup'
 
-const WRAPPER = document.querySelector('.wrapper')
-const CONTENT = document.querySelector('code')
-const BUTTONS = document.querySelector('.header__list')
-const SIDEBAR = document.querySelector('.sidebar')
-const TAB = document.querySelector('.tabs')
-const INPUT_FILE = document.querySelector('#input_file')
-const LINK_FILE = document.querySelector('#download__file')
+export const WRAPPER = document.querySelector('.wrapper')
+export const CONTENT = document.querySelector('code')
+export const BUTTONS = document.querySelector('.header__list')
+export const SIDEBAR = document.querySelector('.sidebar')
+export const TAB = document.querySelector('.tabs')
 // Используется при добавлении файла внутрь каталога
-let activeFolder = null
+export let activeFolder = null
 
 const clickOnButton = (e) => {
     let titlePopup, nameBtn
     const button = e.target.dataset.func
+    if (getDescription()) getDescription().remove()
     if (button === 'createFolder') {
         titlePopup = 'Введите название папки'
         nameBtn = 'Создать'
@@ -46,9 +70,9 @@ const clickOnButton = (e) => {
                 activeFolder = folder
             }
         })
-        INPUT_FILE.click()
+        INPUT.click()
     } else if (button === 'downloadFile') {
-        if (LINK_FILE.href !== '') LINK_FILE.click()
+        if (LINK.href !== '') LINK.click()
     } else if (button === 'removeFile') {
         removeFile()
     }
@@ -64,7 +88,8 @@ const clickOutsideAndUsePopup = (e) => {
         !target.closest('.popup__wrapper') &&
         !target.closest('.header__button') &&
         !target.closest('.folder') &&
-        !target.closest('.file')
+        !target.closest('.file') &&
+        !target.closest('.description')
     ) {
         if (getFolders().length) {
             getFolders().forEach((elem) => {
@@ -76,6 +101,7 @@ const clickOutsideAndUsePopup = (e) => {
                 elem.classList.remove('active')
             })
         }
+        if (getDescription()) getDescription().remove()
         removePopup(popup)
     } else if (target.closest('.popup__button')) {
         if (getFolders().length) {
@@ -107,6 +133,13 @@ const clickOutsideAndUsePopup = (e) => {
 
         removePopup(popup)
     }
+    if (target.closest('.description__edit')) {
+        if (target.innerText === 'Редактировать') {
+            editDescription()
+        } else {
+            saveDescription()
+        }
+    }
 }
 
 WRAPPER.addEventListener('click', clickOutsideAndUsePopup)
@@ -130,6 +163,7 @@ const clickOnBarAndArrow = (e) => {
                 file.classList.remove('active')
             }
         })
+        if (getDescription()) getDescription().remove()
     }
     if (target.closest('.folder__arrow')) {
         const parentArrow = target.parentNode
@@ -141,6 +175,7 @@ const clickOnBarAndArrow = (e) => {
 }
 
 SIDEBAR.addEventListener('click', clickOnBarAndArrow)
+SIDEBAR.addEventListener('contextmenu', showDescription)
 
 const dbClickOnFoldersAndFiles = (e) => {
     const target = e.target
@@ -196,326 +231,6 @@ const clickOnTabs = (e) => {
 }
 
 TAB.addEventListener('click', clickOnTabs)
-
-function createPopup(titlePopup, nameBtn) {
-    let popup = document.createElement('div')
-    popup.className = 'popup'
-
-    let popupWrapper = document.createElement('div')
-    popupWrapper.className = 'popup__wrapper'
-
-    let popupTitle = document.createElement('p')
-    popupTitle.className = 'popup__title'
-    popupTitle.innerText = `${titlePopup}`
-
-    let popupInput = document.createElement('input')
-    popupInput.className = 'popup__input'
-
-    let popupBtn = document.createElement('button')
-    popupBtn.className = 'popup__button'
-    popupBtn.innerText = `${nameBtn}`
-
-    popup.append(popupWrapper)
-    popupWrapper.append(popupTitle, popupInput, popupBtn)
-    WRAPPER.append(popup)
-}
-
-function removePopup(popup) {
-    if (popup) popup.remove()
-}
-
-function createFolder(input, seat) {
-    let folder = document.createElement('div')
-    folder.className = 'folder'
-    let arrow = document.createElement('div')
-    arrow.className = 'folder__arrow'
-    getArrows().forEach((arrow) => {
-        arrow.classList.contains('active_arrow')
-            ? (folder.style.display = 'block')
-            : (folder.style.display = 'none')
-    })
-    folder.innerText = input.value
-    folder.append(arrow)
-    if (input.value.length > 0) {
-        if (seat === undefined) {
-            folder.style.display = 'block'
-            SIDEBAR.append(folder)
-        } else {
-            folder.className = 'folder active'
-            seat.append(folder)
-            openFolder()
-        }
-    }
-}
-
-function getFolders() {
-    return document.querySelectorAll('.folder')
-}
-
-function getArrows() {
-    return document.querySelectorAll('.folder__arrow')
-}
-
-function removeFolder() {
-    getFolders().forEach((folder) => {
-        if (folder.classList.contains('active')) {
-            const foldParent = folder.parentNode
-            if (foldParent.children.length < 3) {
-                foldParent.children[0].classList.remove('active_arrow')
-            }
-            folder.remove()
-        }
-    })
-}
-
-function renameFolder(input) {
-    getFolders().forEach((folder) => {
-        if (folder.classList.contains('active')) {
-            if (input.value.length > 0) {
-                folder.firstChild.nodeValue = input.value
-                folder.classList.remove('active')
-            }
-        }
-    })
-}
-
-function openFolder() {
-    getFolders().forEach((folder) => {
-        if (
-            folder.classList.contains('active') ||
-            folder.children[0].classList.contains('active')
-        ) {
-            if (folder.children.length > 1) {
-                folder.classList.remove('active')
-                folder.children[0].classList.add('active_arrow')
-                const foldersChild = folder.children
-                const foldersArray = Array.prototype.slice.call(foldersChild)
-                foldersArray.forEach((folderChild) => {
-                    folderChild.style.display = 'block'
-                })
-            }
-        }
-    })
-}
-
-function closeFolder() {
-    getFolders().forEach((folder) => {
-        if (
-            folder.classList.contains('active') ||
-            folder.children[0].classList.contains('active')
-        ) {
-            if (folder.children.length > 1) {
-                const arrowsChild = folder.querySelectorAll('.active_arrow')
-                const foldersChild = folder.querySelectorAll('.folder')
-                const filesChild = folder.querySelectorAll('.file')
-                arrowsChild.forEach((arrow) => {
-                    arrow.classList.remove('active_arrow')
-                })
-                foldersChild.forEach((folderChild) => {
-                    folderChild.style.display = 'none'
-                })
-                filesChild.forEach((fileChild) => {
-                    fileChild.style.display = 'none'
-                })
-            }
-        }
-    })
-}
-
-function uploadFile(event) {
-    if (event.target.files.length) {
-        const fileInfo = {
-            name: '',
-            value: '',
-            url: '',
-        }
-
-        const file = event.target.files[0]
-        const nameFile = file.name
-
-        const reader = new FileReader()
-        const readerUrl = new FileReader()
-
-        const getUrl = new Promise((resolve) => {
-            readerUrl.onload = () => {
-                const url = readerUrl.result
-                resolve(url)
-            }
-        })
-        const getContent = new Promise((resolve) => {
-            reader.onload = () => {
-                const value = reader.result
-                addFile(nameFile, value)
-                resolve(value)
-            }
-        })
-
-        Promise.all([getUrl, getContent]).then((data) => {
-            fileInfo.name = nameFile
-            fileInfo.value = data[1]
-            fileInfo.url = data[0]
-            localStorage.setItem(`${nameFile}`, JSON.stringify(fileInfo))
-        })
-
-        readerUrl.readAsDataURL(file)
-        reader.readAsText(file)
-    }
-}
-
-INPUT_FILE.addEventListener('change', uploadFile)
-
-function addFile(nameFile, value) {
-    let file = document.createElement('div')
-    file.className = 'file active'
-    file.innerText = nameFile
-    file.style.display = 'block'
-
-    getFilesFromTab().forEach((tab) => {
-        tab.classList.remove('active')
-    })
-
-    let isHave = false
-
-    getFolders().forEach((folder) => {
-        if (folder === activeFolder) {
-            folder.children[0].classList.add('active_arrow')
-        }
-    })
-
-    const appendFile = () => {
-        activeFolder ? activeFolder.append(file) : SIDEBAR.append(file)
-        TAB.append(addTab(nameFile))
-        CONTENT.innerHTML = value
-        hljs.highlightAll()
-    }
-
-    if (!getFiles().length) {
-        appendFile()
-    } else {
-        getFiles().forEach((files) => {
-            if (files.innerText === nameFile) {
-                isHave = true
-            }
-        })
-        if (!isHave) {
-            appendFile()
-        }
-    }
-}
-
-function addTab(nameFile) {
-    let tab = document.createElement('span')
-    tab.className = 'tabs__tab active'
-    tab.innerText = nameFile
-
-    let cross = document.createElement('span')
-    cross.className = 'tabs__cross'
-
-    tab.append(cross)
-    return tab
-}
-
-function getFilesFromTab() {
-    return document.querySelectorAll('.tabs__tab')
-}
-
-function getFiles() {
-    return document.querySelectorAll('.file')
-}
-
-function downloadFile() {
-    getFiles().forEach((file) => {
-        if (file.classList.contains('active')) {
-            const item = localStorage.getItem(`${file.innerText}`)
-            const value = JSON.parse(item)
-            LINK_FILE.href = value.url
-            LINK_FILE.download = value.name
-        }
-    })
-}
-
-LINK_FILE.addEventListener('click', downloadFile)
-
-function openFile(file) {
-    file.classList.add('active')
-    const nameFile = file.innerText
-    const item = localStorage.getItem(`${nameFile}`)
-    const value = JSON.parse(item)
-    if (value) CONTENT.innerHTML = value.value
-    hljs.highlightAll()
-    let isHaveFile = false
-    getFilesFromTab().forEach((tab, index) => {
-        if (nameFile === tab.innerText) {
-            isHaveFile = true
-        }
-    })
-    if (!isHaveFile) TAB.append(addTab(nameFile))
-}
-
-function updateContent() {
-    if (getFilesFromTab().length) {
-        getFilesFromTab().forEach((tab, index) => {
-            if (index < 1) {
-                tab.classList.add('active')
-                const item = localStorage.getItem(`${tab.innerText}`)
-                const value = JSON.parse(item)
-                if (value) CONTENT.innerHTML = value.value
-                hljs.highlightAll()
-            } else {
-                tab.classList.remove('active')
-            }
-        })
-    }
-}
-
-function closeFile(parent) {
-    if (parent.classList.contains('active')) {
-        parent.remove()
-        CONTENT.innerText = ''
-        updateContent()
-    }
-}
-
-function removeFile() {
-    getFiles().forEach((file) => {
-        if (file.classList.contains('active')) {
-            const name = file.innerText
-            localStorage.removeItem(name)
-            file.remove()
-            CONTENT.innerText = ''
-            getFilesFromTab().forEach((tab) => {
-                if (name === tab.innerText) {
-                    tab.remove()
-                }
-            })
-            updateContent()
-        }
-    })
-}
-
-function renameFile(input) {
-    const files = Array.from(getFiles())
-    const filterFile = files.filter((name) => name.innerText === input.value)
-    if (!filterFile.length)
-        getFiles().forEach((file) => {
-            if (file.classList.contains('active')) {
-                if (input.value.length > 0) {
-                    const item = localStorage.getItem(`${file.innerText}`)
-                    localStorage.removeItem(`${file.innerText}`)
-                    const value = JSON.parse(item)
-                    value.name = input.value
-                    localStorage.setItem(value.name, JSON.stringify(value))
-                    getFilesFromTab().forEach((tab) => {
-                        if (tab.innerText === file.innerText) {
-                            tab.firstChild.nodeValue = input.value
-                        }
-                    })
-                    file.firstChild.nodeValue = input.value
-                    file.classList.remove('active')
-                }
-            }
-        })
-}
 
 window.addEventListener('pageshow', () => {
     localStorage.clear()
