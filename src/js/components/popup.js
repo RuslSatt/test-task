@@ -13,6 +13,7 @@ function createPopup(titlePopup, nameBtn) {
 
     let popupInput = document.createElement('input')
     popupInput.className = 'popup__input'
+    popupInput.setAttribute('maxlength', '20')
 
     let popupBtn = document.createElement('button')
     popupBtn.className = 'popup__button'

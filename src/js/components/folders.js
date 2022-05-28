@@ -1,26 +1,40 @@
 import { SIDEBAR } from '../index'
 
-function createFolder(input, seat) {
+function createFolder(popupInput, parentFolder) {
     let folder = document.createElement('div')
     folder.className = 'folder'
 
+    let name = document.createElement('span')
+    name.className = 'folder__name'
+    name.style.paddingLeft = '17px'
+
     let arrow = document.createElement('div')
     arrow.className = 'folder__arrow'
+    arrow.style.left = '0'
 
-    getArrows().forEach((arrow) => {
-        arrow.classList.contains('active_arrow')
-            ? (folder.style.display = 'block')
-            : (folder.style.display = 'none')
-    })
-    folder.innerText = input.value
-    folder.append(arrow)
-    if (input.value.length > 0) {
-        if (seat === undefined) {
+    name.innerText = popupInput.value
+    folder.append(arrow, name)
+
+    if (popupInput.value.length > 0) {
+        if (parentFolder === undefined) {
             folder.style.display = 'block'
             SIDEBAR.append(folder)
         } else {
+            const folderName = folder.querySelector('.folder__name')
+            const folderArrow = folder.querySelector('.folder__arrow')
+
+            const parentFolderArrow =
+                parentFolder.querySelector('.folder__arrow')
+            const parentFolderName = parentFolder.querySelector('.folder__name')
+
+            const left = parentFolderArrow.style.left
+            const paddingLeft = parentFolderName.style.paddingLeft
+
+            folderName.style.paddingLeft = parseInt(paddingLeft) + 17 + 'px'
+            folderArrow.style.left = parseInt(left) + 17 + 'px'
+
             folder.className = 'folder active'
-            seat.append(folder)
+            parentFolder.append(folder)
             openFolder()
         }
     }
@@ -37,9 +51,11 @@ function getArrows() {
 function removeFolder() {
     getFolders().forEach((folder) => {
         if (folder.classList.contains('active')) {
-            const foldParent = folder.parentNode
-            if (foldParent.children.length < 3) {
-                foldParent.children[0].classList.remove('active_arrow')
+            const folderParent = folder.parentNode
+            const folderParentArrow =
+                folderParent.querySelector('.folder__arrow')
+            if (folderParent.children.length < 3) {
+                folderParentArrow.classList.remove('active_arrow')
             }
             folder.remove()
         }
@@ -49,8 +65,9 @@ function removeFolder() {
 function renameFolder(input) {
     getFolders().forEach((folder) => {
         if (folder.classList.contains('active')) {
+            const folderName = folder.querySelector('.folder__name')
             if (input.value.length > 0) {
-                folder.firstChild.nodeValue = input.value
+                folderName.innerText = input.value
                 folder.classList.remove('active')
             }
         }
@@ -59,17 +76,20 @@ function renameFolder(input) {
 
 function openFolder() {
     getFolders().forEach((folder) => {
-        if (
-            folder.classList.contains('active') ||
-            folder.children[0].classList.contains('active')
-        ) {
-            if (folder.children.length > 1) {
+        if (folder.classList.contains('active')) {
+            const folderArrow = folder.querySelector('.folder__arrow')
+            const folderChild = folder.querySelector('.folder')
+            const fileChild = folder.querySelector('.file')
+
+            if (folderChild || fileChild) {
                 folder.classList.remove('active')
-                folder.children[0].classList.add('active_arrow')
-                const foldersChild = folder.children
-                const foldersArray = Array.prototype.slice.call(foldersChild)
-                foldersArray.forEach((folderChild) => {
-                    folderChild.style.display = 'block'
+                folderArrow.classList.add('active_arrow')
+
+                const folderChildren = folder.children
+                let children = Array.prototype.slice.call(folderChildren)
+
+                children.forEach((child) => {
+                    child.style.display = 'block'
                 })
             }
         }
@@ -78,26 +98,35 @@ function openFolder() {
 
 function closeFolder() {
     getFolders().forEach((folder) => {
-        if (
-            folder.classList.contains('active') ||
-            folder.children[0].classList.contains('active')
-        ) {
-            if (folder.children.length > 1) {
-                const arrowsChild = folder.querySelectorAll('.active_arrow')
-                const foldersChild = folder.querySelectorAll('.folder')
-                const filesChild = folder.querySelectorAll('.file')
-                arrowsChild.forEach((arrow) => {
+        if (folder.classList.contains('active')) {
+            const foldersArrows = folder.querySelectorAll('.active_arrow')
+            const folderChildren = folder.querySelectorAll('.folder')
+            const fileChildren = folder.querySelectorAll('.file')
+
+            if (folderChildren || fileChildren) {
+                foldersArrows.forEach((arrow) => {
                     arrow.classList.remove('active_arrow')
                 })
-                foldersChild.forEach((folderChild) => {
+                folderChildren.forEach((folderChild) => {
                     folderChild.style.display = 'none'
                 })
-                filesChild.forEach((fileChild) => {
+                fileChildren.forEach((fileChild) => {
                     fileChild.style.display = 'none'
                 })
             }
         }
     })
+}
+
+function callOpenOrCloseFolder(parent) {
+    const folderChild = parent.querySelector('.folder')
+    const fileChild = parent.querySelector('.file')
+
+    if (folderChild) {
+        folderChild.style.display === 'none' ? openFolder() : closeFolder()
+    } else if (fileChild) {
+        fileChild.style.display === 'none' ? openFolder() : closeFolder()
+    }
 }
 
 export {
@@ -108,4 +137,5 @@ export {
     removeFolder,
     renameFolder,
     getArrows,
+    callOpenOrCloseFolder,
 }

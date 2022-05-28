@@ -23,7 +23,6 @@ function createDescription(mouseX, mouseY, name) {
 
     let editBtn = document.createElement('button')
     editBtn.className = 'description__edit'
-    editBtn.innerText = 'Редактировать'
 
     description.append(title, content, editBtn)
     WRAPPER.append(description)
@@ -50,35 +49,36 @@ function showDescription(e) {
 }
 
 function editDescription() {
-    let area = document.createElement('textarea')
-    area.className = 'description__area'
-    area.value = getElements().content.innerText
+    let editArea = document.createElement('textarea')
+    editArea.className = 'description__area'
+    editArea.setAttribute('maxlength', '70')
+    editArea.value = getElements().content.innerText
 
     const content = getElements().content
 
     content.style.display = 'none'
 
-    getElements().title.after(area)
+    getElements().title.after(editArea)
 
-    getElements().editBtn.innerText = 'Сохранить'
+    getElements().editBtn.classList.add('edit')
 }
 
 function saveDescription() {
     const content = getElements().content
-    const area = getElements().area
-    const name = getElements().title.innerText
+    const editArea = getElements().area
+    const fileName = getElements().title.innerText
 
-    area.style.display = 'none'
+    editArea.style.display = 'none'
 
-    content.innerText = area.value
+    content.innerText = editArea.value
     content.style.display = 'block'
 
-    getElements().editBtn.innerText = 'Редактировать'
+    getElements().editBtn.classList.remove('edit')
 
-    const item = localStorage.getItem(name)
+    const item = localStorage.getItem(fileName)
     const value = JSON.parse(item)
-    value.description = area.value
-    localStorage.setItem(name, JSON.stringify(value))
+    value.description = editArea.value
+    localStorage.setItem(fileName, JSON.stringify(value))
 }
 
 function getElements() {
