@@ -1,38 +1,19 @@
 import '../index.html'
 import '../styles/main.scss'
 import 'highlight.js/styles/github.css'
-import {
-    editDescription,
-    getDescription,
-    saveDescription,
-    showDescription,
-} from './components/description'
-import {
-    closeFile,
-    getFiles,
-    getFilesFromTab,
-    INPUT,
-    LINK,
-    openFile,
-    removeFile,
-    renameFile,
-} from './components/files'
-import {
-    callOpenOrCloseFolder,
-    createFolder,
-    getFolders,
-    removeFolder,
-    renameFolder,
-} from './components/folders'
-import { createPopup, removePopup } from './components/popup'
 
-export const WRAPPER = document.querySelector('.wrapper')
-export const CONTENT = document.querySelector('code')
-export const BUTTONS = document.querySelector('.header__list')
-export const SIDEBAR = document.querySelector('.sidebar')
-export const TAB = document.querySelector('.tabs ul')
+import { DOWNLOAD, fileMethods, UPLOAD } from './components/fileMethods'
+import { folderMethods } from './components/folderMethods'
+import { common } from './components/common'
+import { descriptionMethods } from './components/descriptionMethods'
+import { popupMethods } from './components/popupMethods'
+
+const WRAPPER = document.querySelector('.wrapper')
+const BUTTONS = document.querySelector('.header__list')
+const SIDEBAR = document.querySelector('.sidebar')
+const TAB = document.querySelector('.tabs ul')
 // Используется при добавлении файла внутрь каталога
-export let activeFolder = null
+let activeFolder = null
 
 const clickOnButton = (e) => {
     let titlePopup, nameBtn
@@ -42,59 +23,59 @@ const clickOnButton = (e) => {
         case 'createFolder': {
             titlePopup = 'Введите название папки'
             nameBtn = 'Создать'
-            createPopup(titlePopup, nameBtn)
+            popupMethods.createPopup(titlePopup, nameBtn)
             break
         }
         case 'removeFolder': {
-            removeFolder()
+            folderMethods.removeFolder()
             break
         }
         case 'rename': {
-            if (getFolders().length)
-                getFolders().forEach((folder) => {
+            if (common.getFolders().length)
+                common.getFolders().forEach((folder) => {
                     if (folder.classList.contains('active')) {
                         titlePopup = 'Переименуйте дерикторию'
                         nameBtn = 'Переименовать'
-                        createPopup(titlePopup, nameBtn)
+                        popupMethods.createPopup(titlePopup, nameBtn)
                     }
                 })
-            if (getFiles().length)
-                getFiles().forEach((file) => {
+            if (common.getFiles().length)
+                common.getFiles().forEach((file) => {
                     if (file.classList.contains('active')) {
                         titlePopup = 'Переименуйте файл'
                         nameBtn = 'Переименовать'
-                        createPopup(titlePopup, nameBtn)
+                        popupMethods.createPopup(titlePopup, nameBtn)
                     }
                 })
             break
         }
         case 'uploadFile': {
             activeFolder = null
-            getFolders().forEach((folder) => {
+            common.getFolders().forEach((folder) => {
                 if (folder.classList.contains('active')) {
                     activeFolder = folder
                 }
             })
-            INPUT.click()
+            UPLOAD.click()
             break
         }
         case 'downloadFile': {
-            if (getFiles().length) {
-                getFiles().forEach((file) => {
+            if (common.getFiles().length) {
+                common.getFiles().forEach((file) => {
                     if (file.classList.contains('active')) {
-                        LINK.click()
+                        DOWNLOAD.click()
                     }
                 })
             }
             break
         }
         case 'removeFile': {
-            removeFile()
+            fileMethods.removeFile()
             break
         }
         default: {
-            if (getDescription()) {
-                getDescription().remove()
+            if (descriptionMethods.getDescription()) {
+                descriptionMethods.getDescription().remove()
             }
         }
     }
@@ -113,55 +94,55 @@ const clickOutsideAndUsePopup = (e) => {
         !target.closest('.file') &&
         !target.closest('.description')
     ) {
-        if (getFolders().length) {
-            getFolders().forEach((elem) => {
+        if (common.getFolders().length) {
+            common.getFolders().forEach((elem) => {
                 elem.classList.remove('active')
             })
         }
-        if (getFiles().length) {
-            getFiles().forEach((elem) => {
+        if (common.getFiles().length) {
+            common.getFiles().forEach((elem) => {
                 elem.classList.remove('active')
             })
         }
-        if (getDescription()) {
-            getDescription().remove()
+        if (descriptionMethods.getDescription()) {
+            descriptionMethods.getDescription().remove()
         }
-        removePopup(popup)
+        popupMethods.removePopup(popup)
     } else if (target.closest('.popup__button')) {
-        if (getFolders().length) {
-            getFolders().forEach((folder, index) => {
+        if (common.getFolders().length) {
+            common.getFolders().forEach((folder, index) => {
                 if (folder.classList.contains('active')) {
                     if (target.innerText === 'Создать') {
-                        createFolder(popupInput, folder)
+                        folderMethods.createFolder(popupInput, folder)
                     } else {
-                        renameFolder(popupInput)
+                        folderMethods.renameFolder(popupInput)
                     }
                 } else if (
-                    index === getFolders().length - 1 &&
+                    index === common.getFolders().length - 1 &&
                     target.innerText === 'Создать'
                 ) {
-                    createFolder(popupInput)
+                    folderMethods.createFolder(popupInput)
                 }
             })
         } else if (target.innerText === 'Создать') {
-            createFolder(popupInput)
+            folderMethods.createFolder(popupInput)
         }
 
-        getFiles().forEach((file) => {
+        common.getFiles().forEach((file) => {
             if (
                 file.classList.contains('active') &&
                 target.innerText !== 'Создать'
             )
-                renameFile(popupInput)
+                fileMethods.renameFile(popupInput)
         })
 
-        removePopup(popup)
+        popupMethods.removePopup(popup)
     }
     if (target.closest('.description__edit')) {
         if (!target.classList.contains('edit')) {
-            editDescription()
+            descriptionMethods.editDescription()
         } else {
-            saveDescription()
+            descriptionMethods.saveDescription()
         }
     }
 }
@@ -174,29 +155,31 @@ const clickOnSideBar = (e) => {
         target.classList.add('active')
     }
 
-    if (getFolders().length) {
-        getFolders().forEach((folder) => {
+    if (common.getFolders().length) {
+        common.getFolders().forEach((folder) => {
             if (folder !== target) {
                 folder.classList.remove('active')
             }
         })
     }
 
-    if (getFiles().length) {
-        getFiles().forEach((file) => {
+    if (common.getFiles().length) {
+        common.getFiles().forEach((file) => {
             if (file !== target) {
                 file.classList.remove('active')
             }
         })
     }
 
-    if (getDescription()) getDescription().remove()
+    if (descriptionMethods.getDescription()) {
+        descriptionMethods.getDescription().remove()
+    }
 
     if (target.closest('.folder__arrow')) {
         const folder = target.parentNode
         folder.classList.add('active')
 
-        callOpenOrCloseFolder(folder)
+        folderMethods.callOpenOrCloseFolder(folder)
     }
     if (target.closest('.folder__name')) {
         const folder = target.parentNode
@@ -207,11 +190,11 @@ const clickOnSideBar = (e) => {
 const dbClickOnFoldersAndFiles = (e) => {
     const target = e.target
 
-    callOpenOrCloseFolder(target)
+    folderMethods.callOpenOrCloseFolder(target)
 
     if (target.closest('.file')) {
-        openFile(target)
-        getFilesFromTab().forEach((tab) => {
+        fileMethods.openFile(target)
+        fileMethods.getFilesFromTab().forEach((tab) => {
             if (tab.innerText === target.innerText) {
                 tab.classList.add('active')
             } else {
@@ -222,13 +205,13 @@ const dbClickOnFoldersAndFiles = (e) => {
 }
 
 SIDEBAR.addEventListener('click', clickOnSideBar)
-SIDEBAR.addEventListener('contextmenu', showDescription)
+SIDEBAR.addEventListener('contextmenu', descriptionMethods.showDescription)
 SIDEBAR.addEventListener('dblclick', dbClickOnFoldersAndFiles)
 
 const clickOnTabs = (e) => {
     const target = e.target
-    if (getFilesFromTab().length) {
-        getFilesFromTab().forEach((tab) => {
+    if (fileMethods.getFilesFromTab().length) {
+        fileMethods.getFilesFromTab().forEach((tab) => {
             if (
                 target !== tab &&
                 target !== TAB &&
@@ -236,14 +219,14 @@ const clickOnTabs = (e) => {
             ) {
                 tab.classList.remove('active')
             } else if (tab === target && target !== TAB) {
-                openFile(target)
+                fileMethods.openFile(target)
             }
         })
     }
     if (target.closest('.tabs__cross')) {
         const parent = target.parentNode
         parent.classList.add('active')
-        closeFile(parent)
+        fileMethods.closeFile(parent)
     }
 }
 
@@ -252,3 +235,5 @@ TAB.addEventListener('click', clickOnTabs)
 window.addEventListener('pageshow', () => {
     localStorage.clear()
 })
+
+export { WRAPPER, BUTTONS, SIDEBAR, TAB, activeFolder }
