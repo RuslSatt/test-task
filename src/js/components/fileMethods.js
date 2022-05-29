@@ -1,10 +1,12 @@
-import hljs from 'highlight.js'
+import hljs from 'highlight.js/lib/core'
+import javascript from 'highlight.js/lib/languages/javascript'
 import { activeFolder, SIDEBAR, TAB } from '../index'
 import { common } from './common'
 
 const CONTENT = document.querySelector('code')
 const INPUT_FILE = document.querySelector('#input_file')
 const LINK_DOWNLOAD = document.querySelector('#download__file')
+hljs.registerLanguage('javascript', javascript)
 
 export const fileMethods = {
     uploadFile(event) {
