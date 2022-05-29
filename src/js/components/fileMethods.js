@@ -76,7 +76,7 @@ export const fileMethods = {
 
                 folderArrow.classList.add('active_arrow')
                 paddingLeft = folderName.style.paddingLeft
-                fileName.style.paddingLeft = paddingLeft
+                fileName.style.paddingLeft = parseInt(paddingLeft) + 17 + 'px'
             }
         })
 
@@ -190,14 +190,17 @@ export const fileMethods = {
                 const folder = file.parentNode
                 const folderArrow = folder.querySelector('.folder__arrow')
 
-                if (folderArrow) {
-                    if (folder.children.length < 4) {
-                        folderArrow.classList.remove('active_arrow')
-                    }
+                file.remove()
+
+                const fileChild = folder.querySelector('.file')
+                const folderChild = folder.querySelector('.folder')
+
+                if (!fileChild && !folderChild) {
+                    folderArrow.classList.remove('active_arrow')
                 }
 
                 localStorage.removeItem(fileName)
-                file.remove()
+
                 CONTENT.innerHTML = ''
 
                 common.getFilesFromTab().forEach((tab) => {
