@@ -227,7 +227,7 @@ export const fileMethods = {
 
                         const item = localStorage.getItem(fileName)
                         const data = JSON.parse(item)
-                        data.name = input.value
+                        data.name = input.value.trim()
                         localStorage.setItem(data.name, JSON.stringify(data))
                         localStorage.removeItem(fileName)
 
