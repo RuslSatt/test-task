@@ -3,7 +3,7 @@
 .tabs {
   width: 100%;
   max-width: 758px;
-  height: 50px;
+  height: 40px;
   background: #808080;
 
   ul {
@@ -20,21 +20,24 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    height: 50px;
+    height: 40px;
     padding: 0 20px;
     border: 3px solid rgb(127, 127, 127);
     background: transparent;
     cursor: pointer;
     transition: 0.3s;
+    color: #333333;
 
     &.active {
       border: 3px solid #68a5ff;
       background: #a0a0a0;
       box-shadow: 0 5px 10px 2px rgba(34, 60, 80, 0.2);
+      color: #000000;
     }
 
     &:hover {
       background: #a0a0a0;
+      color: #000000;
     }
   }
 
@@ -45,6 +48,11 @@
     right: 2px;
     padding: 8px;
     border-radius: 50%;
+    transition: 0.3s;
+
+    &:hover {
+      background: #68a5ff;
+    }
 
     &:after {
       content: '';
@@ -56,10 +64,6 @@
       width: 12px;
       height: 2px;
       background: black;
-    }
-
-    &:hover {
-      background: #68a5ff;
     }
 
     &:before {

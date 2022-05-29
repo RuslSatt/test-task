@@ -178,9 +178,10 @@ const clickOnSideBar = (e) => {
 
         folderMethods.callOpenOrCloseFolder(folder)
     }
-    if (target.closest('.folder__name')) {
-        const folder = target.parentNode
-        folder.classList.add('active')
+
+    if (target.closest('.folder__name') || target.closest('.file__name')) {
+        const parent = target.parentNode
+        parent.classList.add('active')
     }
 }
 
