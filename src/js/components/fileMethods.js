@@ -227,17 +227,20 @@ export const fileMethods = {
 
                         const item = localStorage.getItem(fileName)
                         const data = JSON.parse(item)
-                        data.name = input.value.trim()
+
+                        const valueName = input.value.split(' ').join('')
+
+                        data.name = valueName
                         localStorage.setItem(data.name, JSON.stringify(data))
                         localStorage.removeItem(fileName)
 
                         common.getFilesFromTab().forEach((tab) => {
                             if (tab.innerText === fileName) {
-                                tab.firstChild.nodeValue = input.value
+                                tab.firstChild.nodeValue = valueName
                             }
                         })
 
-                        fileChildName.innerText = input.value
+                        fileChildName.innerText = valueName
                         file.classList.remove('active')
                     }
                 }

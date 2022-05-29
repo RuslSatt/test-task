@@ -14,7 +14,7 @@ export const folderMethods = {
         arrow.className = 'folder__arrow'
         arrow.style.left = '0'
 
-        name.innerText = popupInput.value
+        name.innerText = popupInput.value.split(' ').join('')
         folder.append(arrow, name)
 
         if (popupInput.value.length > 0) {
@@ -71,7 +71,7 @@ export const folderMethods = {
             if (folder.classList.contains('active')) {
                 const folderName = folder.querySelector('.folder__name')
                 if (input.value.length > 0) {
-                    folderName.innerText = input.value
+                    folderName.innerText = input.value.split(' ').join('')
                     folder.classList.remove('active')
                 }
             }
