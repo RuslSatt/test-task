@@ -59,7 +59,7 @@ export const folderMethods = {
                 const fileChild = folderParent.querySelector('.file')
                 const folderChild = folderParent.querySelector('.folder')
 
-                if (!fileChild && !folderChild) {
+                if (!fileChild && !folderChild && folderParentArrow) {
                     folderParentArrow.classList.remove('active_arrow')
                 }
             }

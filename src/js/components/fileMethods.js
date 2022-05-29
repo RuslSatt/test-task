@@ -17,7 +17,6 @@ export const fileMethods = {
                 url: '',
                 description: '',
             }
-
             const file = event.target.files[0]
             const fileName = file.name
 
@@ -195,7 +194,7 @@ export const fileMethods = {
                 const fileChild = folder.querySelector('.file')
                 const folderChild = folder.querySelector('.folder')
 
-                if (!fileChild && !folderChild) {
+                if (!fileChild && !folderChild && folderArrow) {
                     folderArrow.classList.remove('active_arrow')
                 }
 
