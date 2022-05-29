@@ -189,8 +189,11 @@ export const fileMethods = {
 
                 const folder = file.parentNode
                 const folderArrow = folder.querySelector('.folder__arrow')
-                if (folder.children.length < 4) {
-                    folderArrow.classList.remove('active_arrow')
+
+                if (folderArrow) {
+                    if (folder.children.length < 4) {
+                        folderArrow.classList.remove('active_arrow')
+                    }
                 }
 
                 localStorage.removeItem(fileName)
