@@ -53,7 +53,7 @@ export const folderMethods = {
                 const folderParent = folder.parentNode
                 const folderParentArrow =
                     folderParent.querySelector('.folder__arrow')
-                if (folderParent.children.length < 3) {
+                if (folderParent.children.length < 4) {
                     folderParentArrow.classList.remove('active_arrow')
                 }
                 folder.remove()

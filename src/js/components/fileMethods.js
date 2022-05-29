@@ -3,8 +3,8 @@ import { activeFolder, SIDEBAR, TAB } from '../index'
 import { common } from './common'
 
 const CONTENT = document.querySelector('code')
-const UPLOAD = document.querySelector('#input_file')
-const DOWNLOAD = document.querySelector('#download__file')
+const INPUT_FILE = document.querySelector('#input_file')
+const LINK_DOWNLOAD = document.querySelector('#download__file')
 
 export const fileMethods = {
     uploadFile(event) {
@@ -23,15 +23,16 @@ export const fileMethods = {
             const readerUrl = new FileReader()
 
             const getUrl = new Promise((resolve) => {
-                readerUrl.onload = () => {
+                readerUrl.onload = (e) => {
+                    e.preventDefault()
                     const url = readerUrl.result
                     resolve(url)
                 }
             })
             const getContent = new Promise((resolve) => {
-                reader.onload = () => {
+                reader.onload = (e) => {
+                    e.preventDefault()
                     const value = reader.result
-                    fileMethods.addFile(fileName, value)
                     resolve(value)
                 }
             })
@@ -41,6 +42,7 @@ export const fileMethods = {
                 fileInfo.value = data[1]
                 fileInfo.url = data[0]
                 localStorage.setItem(`${fileName}`, JSON.stringify(fileInfo))
+                fileMethods.addFile(fileName, data[1])
             })
 
             readerUrl.readAsDataURL(file)
@@ -58,7 +60,7 @@ export const fileMethods = {
         fileName.innerText = nameFile
         fileName.style.paddingLeft = '17px'
 
-        this.getFilesFromTab().forEach((tab) => {
+        common.getFilesFromTab().forEach((tab) => {
             tab.classList.remove('active')
         })
 
@@ -79,7 +81,17 @@ export const fileMethods = {
         file.append(fileName)
 
         const appendFile = () => {
-            activeFolder ? activeFolder.append(file) : SIDEBAR.append(file)
+            if (activeFolder) {
+                activeFolder.append(file)
+                const folderChildren = activeFolder.children
+                let children = Array.prototype.slice.call(folderChildren)
+
+                children.forEach((child) => {
+                    child.style.display = 'block'
+                })
+            } else {
+                SIDEBAR.append(file)
+            }
             TAB.append(this.addTab(nameFile))
             CONTENT.innerHTML = value
         }
@@ -111,17 +123,13 @@ export const fileMethods = {
         return tab
     },
 
-    getFilesFromTab() {
-        return document.querySelectorAll('.tabs__tab')
-    },
-
     downloadFile() {
         common.getFiles().forEach((file) => {
             if (file.classList.contains('active')) {
                 const item = localStorage.getItem(`${file.innerText}`)
-                const value = JSON.parse(item)
-                DOWNLOAD.href = value.url
-                DOWNLOAD.download = value.name
+                const data = JSON.parse(item)
+                LINK_DOWNLOAD.href = data.url
+                LINK_DOWNLOAD.download = data.name
             }
         })
     },
@@ -133,11 +141,11 @@ export const fileMethods = {
         file.classList.add('active')
 
         const item = localStorage.getItem(`${fileName}`)
-        const value = JSON.parse(item)
+        const data = JSON.parse(item)
 
-        if (value) CONTENT.innerHTML = value.value
+        if (data) CONTENT.innerHTML = data.value
 
-        this.getFilesFromTab().forEach((tab) => {
+        common.getFilesFromTab().forEach((tab) => {
             if (fileName === tab.innerText) {
                 isHaveFile = true
             }
@@ -148,14 +156,14 @@ export const fileMethods = {
     },
 
     updateContent() {
-        if (this.getFilesFromTab().length) {
-            this.getFilesFromTab().forEach((tab, index) => {
+        if (common.getFilesFromTab().length) {
+            common.getFilesFromTab().forEach((tab, index) => {
                 if (index < 1) {
                     tab.classList.add('active')
 
                     const item = localStorage.getItem(`${tab.innerText}`)
-                    const value = JSON.parse(item)
-                    if (value) CONTENT.innerHTML = value.value
+                    const data = JSON.parse(item)
+                    if (data) CONTENT.innerHTML = data.value
                     hljs.highlightAll()
                 } else {
                     tab.classList.remove('active')
@@ -164,10 +172,10 @@ export const fileMethods = {
         }
     },
 
-    closeFile(parent) {
-        if (parent.classList.contains('active')) {
-            parent.remove()
-            CONTENT.innerText = ''
+    closeFile(tab) {
+        if (tab.classList.contains('active')) {
+            tab.remove()
+            CONTENT.innerHTML = ''
             this.updateContent()
         }
     },
@@ -177,39 +185,46 @@ export const fileMethods = {
             if (file.classList.contains('active')) {
                 const fileName = file.innerText
 
+                const folder = file.parentNode
+                const folderArrow = folder.querySelector('.folder__arrow')
+                if (folder.children.length < 4) {
+                    folderArrow.classList.remove('active_arrow')
+                }
+
                 localStorage.removeItem(fileName)
                 file.remove()
-                CONTENT.innerText = ''
+                CONTENT.innerHTML = ''
 
-                this.getFilesFromTab().forEach((tab) => {
+                common.getFilesFromTab().forEach((tab) => {
                     if (fileName === tab.innerText) {
                         tab.remove()
                     }
                 })
+
                 this.updateContent()
             }
         })
     },
 
     renameFile(input) {
-        const files = Array.from(files.getFiles())
+        const files = Array.from(common.getFiles())
         const filterFile = files.filter(
             (name) => name.innerText === input.value
         )
         if (!filterFile.length)
-            files.getFiles().forEach((file) => {
+            common.getFiles().forEach((file) => {
                 if (file.classList.contains('active')) {
                     if (input.value.length > 0) {
                         const fileName = file.innerText
                         const fileChildName = file.querySelector('.file__name')
 
                         const item = localStorage.getItem(fileName)
-                        const value = JSON.parse(item)
-                        value.name = input.value
-                        localStorage.setItem(value.name, JSON.stringify(value))
+                        const data = JSON.parse(item)
+                        data.name = input.value
+                        localStorage.setItem(data.name, JSON.stringify(data))
                         localStorage.removeItem(fileName)
 
-                        files.getFilesFromTab().forEach((tab) => {
+                        common.getFilesFromTab().forEach((tab) => {
                             if (tab.innerText === fileName) {
                                 tab.firstChild.nodeValue = input.value
                             }
@@ -223,7 +238,7 @@ export const fileMethods = {
     },
 }
 
-UPLOAD.addEventListener('change', fileMethods.uploadFile)
-DOWNLOAD.addEventListener('click', fileMethods.downloadFile)
+INPUT_FILE.addEventListener('change', fileMethods.uploadFile)
+LINK_DOWNLOAD.addEventListener('click', fileMethods.downloadFile)
 
-export { UPLOAD, DOWNLOAD }
+export { INPUT_FILE, LINK_DOWNLOAD }

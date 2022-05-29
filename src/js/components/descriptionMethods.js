@@ -37,8 +37,8 @@ export const descriptionMethods = {
         common.getFolders().forEach((folder) => {
             folder.classList.remove('active')
         })
-        if (descriptionMethods.getDescription()) {
-            descriptionMethods.getDescription().remove()
+        if (common.getDescription()) {
+            common.getDescription().remove()
         }
 
         if (target.closest('.file')) {
@@ -90,9 +90,5 @@ export const descriptionMethods = {
             title: document.querySelector('.description__title'),
             area: document.querySelector('.description__area'),
         }
-    },
-
-    getDescription() {
-        return document.querySelector('.description')
     },
 }
