@@ -57,6 +57,7 @@ const clickOnButton = (e) => {
         }
         case 'uploadFile': {
             activeFolder = null
+            INPUT_FILE.value = ''
             common.getFolders().forEach((folder) => {
                 if (folder.classList.contains('active')) {
                     activeFolder = folder

@@ -24,15 +24,13 @@ export const fileMethods = {
             const readerUrl = new FileReader()
 
             const getUrl = new Promise((resolve) => {
-                readerUrl.onload = (e) => {
-                    e.preventDefault()
+                readerUrl.onload = () => {
                     const url = readerUrl.result
                     resolve(url)
                 }
             })
             const getContent = new Promise((resolve) => {
-                reader.onload = (e) => {
-                    e.preventDefault()
+                reader.onload = () => {
                     const value = reader.result
                     resolve(value)
                 }
