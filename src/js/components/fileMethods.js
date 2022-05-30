@@ -68,6 +68,8 @@ export const fileMethods = {
                 arrow = folder.querySelector('.folder__arrow')
                 const folderName = folder.querySelector('.folder__name')
 
+                if (arrow) arrow.classList.add('active_arrow')
+
                 paddingLeft = folderName.style.paddingLeft
                 fileName.style.paddingLeft = parseInt(paddingLeft) + 17 + 'px'
             }
@@ -100,8 +102,6 @@ export const fileMethods = {
                 }
             })
             if (!isHave) {
-                if (arrow) arrow.classList.add('active_arrow')
-
                 common.getFilesFromTab().forEach((tab) => {
                     if (tab.classList.contains('active')) {
                         tab.classList.remove('active')
