@@ -1,5 +1,6 @@
 import { SIDEBAR } from '../index'
 import { common } from './common'
+import { CONTENT, fileMethods } from './fileMethods'
 
 export const folderMethods = {
     createFolder(popupInput, parentFolder) {
@@ -50,6 +51,23 @@ export const folderMethods = {
     removeFolder() {
         common.getFolders().forEach((folder) => {
             if (folder.classList.contains('active')) {
+                const files = folder.querySelectorAll('.file')
+
+                files.forEach((file) => {
+                    const fileName = file.innerText
+
+                    CONTENT.innerHTML = ''
+
+                    localStorage.removeItem(fileName)
+
+                    common.getFilesFromTab().forEach((tab) => {
+                        if (tab.innerText === fileName) {
+                            tab.remove()
+                            fileMethods.updateContent()
+                        }
+                    })
+                })
+
                 const folderParent = folder.parentNode
                 const folderParentArrow =
                     folderParent.querySelector('.folder__arrow')
