@@ -1,0 +1,81 @@
+@import "template";
+
+.tabs {
+  width: 100%;
+  max-width: 758px;
+  height: 40px;
+  background: #808080;
+
+  ul {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    overflow: hidden;
+  }
+
+  &__tab {
+    font-size: 14px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 40px;
+    padding: 0 20px;
+    border: 3px solid rgb(127, 127, 127);
+    background: transparent;
+    cursor: pointer;
+    transition: 0.3s;
+    color: #333333;
+
+    &.active {
+      border: 3px solid #68a5ff;
+      background: #a0a0a0;
+      box-shadow: 0 5px 10px 2px rgba(34, 60, 80, 0.2);
+      color: #000000;
+    }
+
+    &:hover {
+      background: #a0a0a0;
+      color: #000000;
+    }
+  }
+
+  &__cross {
+    position: absolute;
+    cursor: pointer;
+    top: 2px;
+    right: 2px;
+    padding: 8px;
+    border-radius: 50%;
+    transition: 0.3s;
+
+    &:hover {
+      background: #68a5ff;
+    }
+
+    &:after {
+      content: '';
+      position: absolute;
+      display: inline-block;
+      left: 2px;
+      top: 7px;
+      transform: rotate(-45deg);
+      width: 12px;
+      height: 2px;
+      background: black;
+    }
+
+    &:before {
+      content: '';
+      position: absolute;
+      left: 2px;
+      top: 7px;
+      display: inline-block;
+      transform: rotate(45deg);
+      width: 12px;
+      height: 2px;
+      background: black;
+    }
+  }
+}

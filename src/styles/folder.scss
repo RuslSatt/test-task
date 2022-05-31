@@ -1,0 +1,51 @@
+@import "template";
+.folder {
+  @extend %fileAndFolder;
+
+  &__name {
+    &:before {
+      content: '';
+      padding-right: 16px;
+      margin-right: 5px;
+      background: url("../assets/images/icon-folder.png") center no-repeat;
+    }
+  }
+
+  &__arrow {
+    position: absolute;
+    z-index: 2;
+    top: 12px;
+    left: 0;
+    transform: translate(0, -50%);
+    margin-left: 5px;
+    width: 0;
+    height: 0;
+    border-top: 3.5px solid transparent;
+    border-left: 7px solid #000000;
+    border-bottom: 3.5px solid transparent;
+    cursor: pointer;
+
+    &.active_arrow {
+      border-top: 0;
+      border-left: 7px solid transparent;
+      border-bottom: 7px solid #000000;
+    }
+  }
+}
+
+#input_file {
+  display: none;
+}
+
+.file {
+  @extend %fileAndFolder;
+
+  &__name {
+    &:before {
+      content: '';
+      padding-right: 16px;
+      margin-right: 5px;
+      background: url("../assets/images/file.png") center no-repeat;
+    }
+  }
+}

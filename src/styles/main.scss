@@ -1,0 +1,69 @@
+@import "reset";
+@import 'popup';
+@import "folder";
+@import "header";
+@import "tabs";
+@import "description";
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap');
+
+// global ---------------- //
+html {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.wrapper {
+  font-family: 'Noto Sans', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  position: relative;
+  padding: 20px 50px 60px 50px;
+  overflow: hidden;
+  background: #ddedff;
+}
+
+.window {
+  width: 1060px;
+  border: 3px solid orange;
+  box-shadow: 0 10px 10px 2px rgba(34, 60, 80, 0.2);
+}
+// main ------------------- //
+
+.main {
+  display: flex;
+  height: 610px;
+
+  &__area {
+    background: #dcdcdc;
+    width: 100%;
+  }
+
+  &__content {
+    max-height: 570px;
+    width: 758px;
+  }
+}
+
+code.hljs {
+  margin-top: -12.5px;
+  max-height: 570px;
+  min-height: 570px;
+  background: #dcdcdc;
+}
+
+.sidebar {
+  height: 100%;
+  width: 100%;
+  background: #808080;
+  border-right: 3px solid orange;
+  padding: 5px;
+  overflow-y: auto;
+}
+
+
+
